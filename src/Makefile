@@ -29,14 +29,23 @@ debug:	$(DEBUGOBJS)
 
 # default rules (.F -> .for -> .o/.do)
 # ------------
+PLATFORM := $(shell uname)
 %.for:	%.F $(DEPEND)
 	rm -f $*.for
 	$(FCOM) $(CPPFLAGS) $*.F > $*.for
+ifeq ($(PLATFORM),Darwin)
+	sed -i '.bak' '/^\#/d' $*.for
+else
 	sed -i '/^\#/d' $*.for
+endif
 
 %.inc:	%.inc.F #$(DEPEND)
-	$(FCOM) $(CPPFLAGS) $*.inc.F > $*.inc
-	sed -i '/^\#/d' $*.inc
+	$(FCOM) $(CPPFLAGS) $*.inc.F > $*.inc	
+ifeq ($(PLATFORM),Darwin)
+	sed -i '.bak' '/^\#/d' $*.inc
+else
+	sed -i '/^\#/d' $*.for
+endif
 
 $(OBJS): %.o: %.for $(DEPEND)
 	$(FCOM) -c -o $@ $(COMPFLAGS) $*.for
